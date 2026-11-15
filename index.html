@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Highlighter Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef0ff;--panel:#fff;--ink:#14173a;--muted:#5a6090;--line:#d3d8f5;--hl:#ffd93d;--hlk:#b8941a;--acc:#5b4bff;--accd:#3a2fb0;--grid:rgba(91,75,255,.22);--ok:#12805c;--bad:#c2362b;
+--head:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;--body:"Source Serif 4",Georgia,serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c0f2c;--panel:#171b45;--ink:#eef0ff;--muted:#a0a8e0;--line:#2c3270;--acc:#8c7dff;--accd:#5b4bd6;--grid:rgba(140,125,255,.3);--ok:#4fd1a1;--bad:#ff8a7e}}
+:root[data-theme="dark"]{--bg:#0c0f2c;--panel:#171b45;--ink:#eef0ff;--muted:#a0a8e0;--line:#2c3270;--acc:#8c7dff;--accd:#5b4bd6;--grid:rgba(140,125,255,.3);--ok:#4fd1a1;--bad:#ff8a7e}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 var(--body);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,button,label,.nav,.chip{font-family:var(--head)}
+.floor{position:fixed;left:-50%;right:-50%;bottom:0;height:60vh;transform-origin:bottom;transform:perspective(500px) rotateX(62deg);z-index:-1;
+background:linear-gradient(var(--grid) 2px,transparent 2px) 0 0/64px 64px,linear-gradient(90deg,var(--grid) 2px,transparent 2px) 0 0/64px 64px;
+-webkit-mask-image:linear-gradient(transparent,#000 70%);mask-image:linear-gradient(transparent,#000 70%);animation:fl 4s linear infinite}
+@keyframes fl{to{background-position:0 64px,0 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.app{max-width:1100px;margin:0 auto;padding:16px 18px 90px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.cw{width:44px;height:44px;perspective:320px}
+.cube{width:44px;height:44px;position:relative;transform-style:preserve-3d;animation:sp 8s linear infinite}
+.cube i{position:absolute;inset:0;border:2px solid var(--ink);background:color-mix(in srgb,var(--hl) 88%,transparent)}
+.cube i:nth-child(1){transform:translateZ(22px)}.cube i:nth-child(2){transform:rotateY(90deg) translateZ(22px)}.cube i:nth-child(3){transform:rotateY(180deg) translateZ(22px)}
+.cube i:nth-child(4){transform:rotateY(-90deg) translateZ(22px)}.cube i:nth-child(5){transform:rotateX(90deg) translateZ(22px)}.cube i:nth-child(6){transform:rotateX(-90deg) translateZ(22px)}
+@keyframes sp{from{transform:rotateX(-25deg) rotateY(0)}to{transform:rotateX(-25deg) rotateY(360deg)}}
+.logo{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.nav button{background:var(--panel);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);border-radius:12px;padding:8px 14px;font-weight:700;font-size:15px;color:var(--ink);cursor:pointer}
+.nav button[aria-current=page]{background:var(--hl);border-color:var(--hlk);box-shadow:0 4px 0 var(--hlk);color:#1b1b3a}
+.chip{display:flex;align-items:center;gap:8px;background:var(--panel);border:2px solid var(--line);border-radius:99px;padding:4px 14px 4px 4px;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font:800 14px var(--head)}
+.panel{background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 0 var(--line);margin-bottom:18px}
+.tilt{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .15s ease-out;will-change:transform}
+h2{font-size:26px;margin:0 0 8px;line-height:1.15}h3{font-size:20px;margin:0 0 6px}
+.muted{color:var(--muted);font-size:15px}
+.grid2{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:20px;align-items:start}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+textarea,input,select{width:100%;font:16px var(--body);color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px;margin:6px 0}
+textarea{min-height:170px;resize:vertical}
+label{display:block;font-weight:700;font-size:14px;margin-top:10px}
+.chk{display:flex;gap:8px;align-items:center;font-weight:600;margin:4px 0}.chk input{width:auto;margin:0}
+.btn{font-weight:800;font-size:17px;border:0;border-radius:12px;padding:12px 20px;background:var(--hl);color:#1b1b3a;box-shadow:0 6px 0 var(--hlk);cursor:pointer;transition:transform .08s,box-shadow .08s;margin-top:12px}
+.btn.alt{background:var(--acc);color:#fff;box-shadow:0 6px 0 var(--accd)}
+.btn:active:not(:disabled){transform:translateY(5px);box-shadow:0 1px 0 var(--hlk)}
+.btn.alt:active:not(:disabled){box-shadow:0 1px 0 var(--accd)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.msg{font-size:15px;margin:10px 0 0;color:var(--muted)}.msg.err{color:var(--bad)}
+.banner{background:var(--hl);color:#1b1b3a;border-radius:12px;padding:10px 14px;font:600 15px var(--head);margin-bottom:16px}
+.an{border-left:4px solid var(--hl);padding-left:12px;color:var(--muted);font-style:italic}
+.terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.term{background:var(--bg);border-radius:12px;padding:10px 14px;font-size:16px;line-height:1.45}.term b{font-family:var(--head);display:block}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.chat{min-height:260px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
+.bub{max-width:85%;padding:10px 14px;border-radius:16px;white-space:pre-wrap}.bub.u{align-self:flex-end;background:var(--acc);color:#fff}.bub.a{background:var(--bg);border:2px solid var(--line)}
+.ask{display:flex;gap:8px}.ask input{margin:0}.ask .btn{margin:0;white-space:nowrap}
+.hud{display:flex;justify-content:space-between;font:800 18px var(--head);margin-bottom:8px}
+.tbar{height:12px;border-radius:9px;background:var(--line);overflow:hidden;margin-bottom:16px}.tbar i{display:block;height:100%;background:var(--ok);width:100%}
+.qq{font:700 26px/1.3 var(--head);margin:6px 0 18px}
+.qtype{display:inline-block;background:var(--bg);border-radius:99px;padding:3px 12px;font:700 13px var(--head)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.tiles{grid-template-columns:1fr}}
+.tile{display:flex;align-items:center;gap:12px;text-align:left;font:700 18px/1.3 var(--head);color:#fff;border:0;border-radius:14px;padding:18px 16px;min-height:80px;background:var(--c);box-shadow:0 8px 0 var(--d);cursor:pointer;transition:transform .08s,box-shadow .08s,opacity .2s}
+.tile b{font-size:26px;flex:none}
+.tile:active:not(:disabled){transform:translateY(7px);box-shadow:0 1px 0 var(--d)}
+.tile.sel{outline:4px solid var(--ink);outline-offset:2px}
+.tile:disabled{cursor:default}.tile.dim{opacity:.35}.tile.ok::after{content:"✓";margin-left:auto;font-size:28px}.tile.bad::after{content:"✗";margin-left:auto;font-size:28px}
+.fb{margin-top:18px;padding:12px 14px;border-radius:12px;background:var(--bg);font-size:16px;line-height:1.5}
+.big{font:800 64px/1 var(--head)}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:14px;padding:20px 0;transform:perspective(900px) rotateX(10deg);min-height:260px}
+.pod{display:flex;flex-direction:column;align-items:center;width:30%;max-width:190px;text-align:center;font:700 15px var(--head)}
+.blk{width:100%;border-radius:10px 10px 0 0;box-shadow:10px 10px 0 rgba(0,0,0,.25);display:grid;place-items:start center;padding-top:8px;font:800 34px var(--head);color:#1b1b3a}
+.row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;font:700 16px var(--head)}.row.me{background:var(--hl);color:#1b1b3a}.row .pts{margin-left:auto}
+#modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(10,12,40,.7);z-index:9;padding:20px}#modal.on{display:grid}
+@media print{.floor,header,.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="floor" aria-hidden="true"></div>
+<div class="app">
+  <header>
+    <div class="cw" aria-hidden="true"><div class="cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    <h1 class="logo">Highlighter Arena</h1>
+    <nav class="nav" id="nav"></nav>
+    <button class="chip" id="me" aria-label="Your username"></button>
+  </header>
+  <div id="bn"></div>
+  <main id="v"></main>
+</div>
+<div id="modal" role="dialog" aria-modal="true"></div>
+<script>
+const use = n => window.claude ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9. ]/g, "").replace(/\s+/g, " ").trim();
+const hue = s => [...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7);
+const av = n => `<span class="av" style="background:hsl(${hue(n)} 65% 42%)">${esc((n || "?")[0].toUpperCase())}</span>`;
+const TYPES = { single: "Choose one", multiple: "Select all that apply", truefalse: "True or false", fill: "Fill in the blank" };
+const SH = ["▲", "◆", "●", "■"], COL = [["#e21b3c", "#a01028"], ["#1368ce", "#0b4a98"], ["#d89e00", "#9a7200"], ["#26890c", "#17600a"]];
+const NAV = [["study", "Study"], ["ask", "Ask"], ["play", "Play"], ["board", "Leaderboard"]];
+let db, user, sample, uid, canWrite = false, players = [], quizzes = [], local = [], view = "study", src = "", kit = null, g = null, chat = [], boardQ = "all", askQ = "me", nickAsked = false;
+const me = () => players.find(p => p.id === uid);
+const allQ = () => db ? quizzes.concat(local) : local;
+const errMsg = e => e && e.code === "not_granted" ? "You declined access to Claude. Reload and allow it to continue." : e && e.code === "rate_limited" ? "Too many requests. Wait a moment and try again." : (e && e.message) || "Something went wrong.";
+
+(async () => {
+  [db, user, sample] = await Promise.all([use("db"), use("user"), use("sample")]);
+  try { uid = user ? await user.id() : null; } catch (e) {}
+  try { canWrite = !!db && !!uid && (await user.can("data.write")) !== false; } catch (e) { canWrite = !!db && !!uid; }
+  if (db) {
+    db.collection("players").onSnapshot(s => { players = s.docs.map(d => ({ id: d.id, ...d.data() })); chrome(); if (!g) soft(); askNick(); }, () => {});
+    db.collection("quizzes").orderBy("at", "desc").limit(50).onSnapshot(s => { quizzes = s.docs.map(d => ({ id: d.id, ...d.data() })); if (!g) soft(); }, () => {});
+  }
+  chrome(); render();
+})();
+
+function chrome() {
+  $("#nav").innerHTML = NAV.map(([k, l]) => `<button data-v="${k}" ${k === view ? 'aria-current="page"' : ""}>${l}</button>`).join("");
+  const m = me(); $("#me").innerHTML = m && m.nick ? av(m.nick) + esc(m.nick) : db && canWrite ? "Pick a username" : "Playing solo";
+  $("#bn").innerHTML = !db ? `<div class="banner">Solo mode: open this page signed in to claude.ai to share quizzes and join the leaderboard.</div>` : !canWrite ? `<div class="banner">You have view-only access. Ask the host to invite you as a Contributor to post scores.</div>` : "";
+}
+function soft() { if (["play", "board"].includes(view)) render(); }
+function render() { if (g && view !== "play") { clearInterval(g.tm); g = null; } if ($("#src")) src = $("#src").value; chrome(); ({ study: studyV, ask: askV, play: playV, board: boardV })[view](); }
+$("#nav").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (b) { view = b.dataset.v; render(); } });
+$("#me").addEventListener("click", () => canWrite && askNick(true));
+document.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;
+  const t = e.target.closest && e.target.closest(".tilt"); document.querySelectorAll(".tilt").forEach(x => { if (x !== t) { x.style.setProperty("--rx", "0deg"); x.style.setProperty("--ry", "0deg"); } });
+  if (t) { const r = t.getBoundingClientRect(); t.style.setProperty("--ry", ((e.clientX - r.left) / r.width - .5) * 6 + "deg"); t.style.setProperty("--rx", (.5 - (e.clientY - r.top) / r.height) * 6 + "deg"); }
+});
+
+function askNick(force) {
+  if (!canWrite || (nickAsked && !force) || (me() && me().nick && !force)) return; nickAsked = true;
+  const m = $("#modal"); m.className = "on";
+  m.innerHTML = `<div class="panel" style="max-width:420px;width:100%"><h2>Pick your username</h2><p class="muted">Friends will see this on the leaderboard.</p><input id="nick" maxlength="16" autocomplete="off" value="${esc(me() ? me().nick : "")}" aria-label="Username"><p class="msg err" id="ne"></p><button class="btn" id="nk">Join the arena</button> ${force ? '<button class="btn alt" id="nc">Cancel</button>' : ""}</div>`;
+  $("#nick").focus();
+  $("#nk").onclick = async () => {
+    const n = $("#nick").value.trim(), er = t => $("#ne").textContent = t;
+    if (!/^[\p{L}\p{N} _.-]{2,16}$/u.test(n)) return er("Use 2 to 16 letters, numbers, spaces, - or _.");
+    if (players.some(p => p.id !== uid && (p.nick || "").toLowerCase() === n.toLowerCase())) return er("That name is taken. Try another.");
+    try { await db.doc("players/" + uid).set({ nick: n, bests: (me() || {}).bests || {} }); m.className = ""; chrome(); } catch (e) { er("Couldn’t save: " + errMsg(e)); }
+  };
+  if ($("#nc")) $("#nc").onclick = () => m.className = "";
+}
+
+/* ---------- Study ---------- */
+function studyV() {
+  $("#v").innerHTML = `<div class="grid2"><div class="panel tilt"><h2>Your source</h2><p class="muted">Paste notes or an article. Claude reads only what you give it.</p>
+  <textarea id="src" placeholder="Paste text here…">${esc(src)}</textarea><label>Or load a .txt / .md file<input type="file" id="file" accept=".txt,.md"></label>
+  <label>Explain it<select id="lvl"><option>like I’m 12</option><option selected>in plain language</option><option>for a first-year student</option></select></label>
+  <button class="btn" id="read">Read and explain</button><p class="msg" id="st"></p></div><div id="kit"></div></div>`;
+  $("#file").onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { $("#src").value = r.result; }; r.readAsText(f); };
+  $("#read").onclick = readIt; if (kit) kitV();
+}
+const st = (t, e) => { const s = $("#st"); if (s) { s.textContent = t; s.className = "msg" + (e ? " err" : ""); } };
+async function readIt() {
+  src = $("#src").value.trim();
+  if (src.length < 40) return st("Add at least a few sentences first.", 1);
+  if (!sample) return st("Claude isn’t available in this view.", 1);
+  $("#read").disabled = true; st("Claude is reading your source…");
+  try {
+    kit = await sample.json(`You are a patient tutor. SOURCE:\n"""${src.slice(0, 60000)}"""\nExplain it ${$("#lvl").value}, using only the source. Reply with only JSON: {"title":str,"summary":str (3-5 sentences),"tldr":[3-5 short strings],"explanation":[{"heading":str,"body":str (2 short paragraphs),"analogy":str}] (4-6 items),"key_terms":[{"term":str,"meaning":str}]}`);
+    kitV(); st("");
+  } catch (e) { st(errMsg(e), 1); }
+  $("#read").disabled = false;
+}
+function kitV() {
+  const k = kit, li = a => (a || []).map(x => `<li>${esc(x)}</li>`).join("");
+  $("#kit").innerHTML = `<div class="panel tilt"><h2>${esc(k.title)}</h2><p>${esc(k.summary)}</p><ul>${li(k.tldr)}</ul></div>` +
+    (k.explanation || []).map(s => `<div class="panel tilt"><h3>${esc(s.heading)}</h3><p>${esc(s.body).replace(/\n+/g, "</p><p>")}</p>${s.analogy ? `<p class="an">${esc(s.analogy)}</p>` : ""}</div>`).join("") +
+    `<div class="panel"><h3>Key terms</h3><div class="terms">${(k.key_terms || []).map(t => `<div class="term"><b>${esc(t.term)}</b>${esc(t.meaning)}</div>`).join("")}</div></div>
+    <div class="panel tilt"><h2>Challenge your friends</h2><div class="row2"><label>Questions<select id="n"><option>5</option><option selected>8</option><option>12</option></select></label>
+    <label>Difficulty<select id="diff"><option>easy</option><option selected>medium</option><option>hard</option></select></label></div>
+    <label class="chk"><input type="checkbox" class="qt" value="single" checked> Choose one</label><label class="chk"><input type="checkbox" class="qt" value="multiple" checked> Select all that apply</label>
+    <label class="chk"><input type="checkbox" class="qt" value="truefalse" checked> True or false</label><label class="chk"><input type="checkbox" class="qt" value="fill" checked> Fill in the blank</label>
+    <button class="btn alt" id="mk">Build quiz and publish it</button><p class="msg" id="qs"></p></div>`;
+  $("#mk").onclick = makeQuiz;
+}
+async function makeQuiz() {
+  const t = [...document.querySelectorAll(".qt:checked")].map(x => x.value); if (!t.length) t.push("single");
+  const d = { single: 'single: 4 "options", "answer" = index', multiple: 'multiple: 5 "options", 2-3 correct, "answer" = array of indexes', truefalse: 'truefalse: "q" is a statement, "answer" = true or false', fill: 'fill: "q" contains ____, "answer" = array of 1-3 accepted short answers' };
+  const b = $("#mk"), q = $("#qs"); b.disabled = true; q.textContent = "Writing questions…";
+  try {
+    const r = await sample.json(`SOURCE:\n"""${src.slice(0, 60000)}"""\nWrite ${$("#n").value} quiz questions at ${$("#diff").value} difficulty using only the source, spread evenly across: ${t.map(x => d[x]).join("; ")}. Each has "type", "q", and a one-sentence "why". Plausible wrong options. Reply with only JSON: {"title":str,"questions":[...]}`);
+    const qs = (r.questions || []).filter(x => x && x.q && x.answer !== undefined && (x.type === "truefalse" || x.type === "fill" || (Array.isArray(x.options) && x.options.length > 1)));
+    if (!qs.length) throw new Error("No usable questions came back. Try again.");
+    const doc = { title: r.title || kit.title, questions: qs, source: src.slice(0, 30000), by: uid || "", nick: (me() || {}).nick || "You", at: Date.now() };
+    if (canWrite) { try { await db.collection("quizzes").add(doc); } catch (e) { local.push({ ...doc, id: "local-" + Date.now() }); } } else local.push({ ...doc, id: "local-" + Date.now() });
+    view = "play"; render();
+  } catch (e) { q.textContent = errMsg(e); q.className = "msg err"; b.disabled = false; }
+}
+
+/* ---------- Ask ---------- */
+function askSrc() { if (askQ === "me") return src; const q = allQ().find(x => x.id === askQ); return q ? q.source || "" : ""; }
+function askV() {
+  const opts = allQ().filter(q => q.source);
+  $("#v").innerHTML = `<div class="panel"><h2>Ask anything about the source</h2><p class="muted">Answers come only from the source text. If it doesn’t cover your question, you’ll be told.</p>
+  <label>Source<select id="as"><option value="me">My pasted source</option>${opts.map(q => `<option value="${esc(q.id)}">${esc(q.title)} (by ${esc(q.nick)})</option>`).join("")}</select></label>
+  <div class="chat" id="chat" aria-live="polite"></div><form class="ask" id="af"><input id="aq" placeholder="Type your question" aria-label="Question"><button class="btn alt">Ask</button></form></div>`;
+  $("#as").value = askQ; $("#as").onchange = e => { askQ = e.target.value; chat = []; paintChat(); };
+  $("#af").onsubmit = e => { e.preventDefault(); ask(); }; paintChat();
+}
+function paintChat() { const c = $("#chat"); if (!c) return; c.innerHTML = chat.length ? chat.map(m => `<div class="bub ${m.r}">${esc(m.t)}</div>`).join("") : `<p class="muted">Try: “Explain the main idea in one minute” or “What would be on an exam?”</p>`; c.scrollTop = c.scrollHeight; }
+async function ask() {
+  const q = $("#aq").value.trim(), S = askSrc(); if (!q) return;
+  if (!S) { chat.push({ r: "a", t: "Add a source in Study first, or pick a friend’s quiz source above." }); return paintChat(); }
+  if (!sample) { chat.push({ r: "a", t: "Claude isn’t available in this view." }); return paintChat(); }
+  $("#aq").value = ""; const hist = chat.slice(-6).map(m => (m.r === "u" ? "Student: " : "Tutor: ") + m.t).join("\n");
+  chat.push({ r: "u", t: q }, { r: "a", t: "Reading the source…" }); paintChat(); const mine = chat[chat.length - 1];
+  try {
+    const r = await sample(`You are a tutor. Answer the student using ONLY the SOURCE below. Explain simply, quoting short phrases from the source as evidence. If the source doesn’t contain the answer, say “The source doesn’t cover that” and mention the closest related point it does make. Never add outside facts.\n\nSOURCE:\n"""${S.slice(0, 60000)}"""\n\nConversation so far:\n${hist}\n\nStudent question: ${q}`, { cache: false, onText: ({ text }) => { mine.t = text; paintChat(); } });
+    mine.t = r.text; paintChat();
+  } catch (e) { mine.t = errMsg(e); paintChat(); }
+}
+
+/* ---------- Play ---------- */
+const bestsOf = id => players.filter(p => p.bests && p.bests[id]).map(p => ({ p, ...p.bests[id] })).sort((a, b) => b.pts - a.pts);
+function playV() {
+  if (g) return qView();
+  const Q = allQ();
+  $("#v").innerHTML = `<h2>Choose a quiz</h2>` + (Q.length ? `<div class="cards">${Q.map(q => { const t = bestsOf(q.id)[0]; return `<div class="panel tilt"><h3>${esc(q.title)}</h3><p class="muted">${q.questions.length} questions · by ${esc(q.nick)}${t ? `<br>Top: ${esc(t.p.nick)} with ${t.pts}` : ""}</p><button class="btn" data-q="${esc(q.id)}">Play</button></div>`; }).join("")}</div>` : `<div class="panel"><p>No quizzes yet. Build one from your source in Study, and friends will see it here.</p></div>`);
+}
+$("#v").addEventListener("click", e => { const b = e.target.closest("[data-q]"); if (b) startGame(b.dataset.q); });
+function startGame(id) { const q = allQ().find(x => x.id === id); if (!q) return; g = { q, i: 0, score: 0, streak: 0, correct: 0, sel: [], locked: false }; view = "play"; chrome(); qView(); }
+const cidx = q => q.type === "truefalse" ? [q.answer === true || q.answer === "true" ? 0 : 1] : q.type === "multiple" ? [].concat(q.answer) : [q.answer];
+const optsOf = q => q.type === "truefalse" ? ["True", "False"] : q.options || [];
+function qView() {
+  const Q = g.q.questions; if (g.i >= Q.length) return endV();
+  const q = Q[g.i]; g.sel = []; g.locked = false; g.lim = q.type === "fill" ? 25 : 20; g.t0 = Date.now();
+  const body = q.type === "fill" ? `<input id="fib" placeholder="Type your answer" autocomplete="off" aria-label="Your answer"><button class="btn alt" id="lock">Lock in</button>` :
+    `<div class="tiles">${optsOf(q).map((o, k) => `<button class="tile" data-k="${k}" style="--c:${COL[k % 4][0]};--d:${COL[k % 4][1]}"><b>${SH[k % 4]}</b><span>${esc(o)}</span></button>`).join("")}</div>${q.type === "multiple" ? `<button class="btn alt" id="lock" disabled>Lock in</button>` : ""}`;
+  $("#v").innerHTML = `<div class="hud"><span>Question ${g.i + 1} of ${Q.length}</span><span>🔥 ${g.streak} · ${g.score} pts</span></div><div class="tbar"><i id="tb"></i></div>
+    <div class="panel"><span class="qtype">${TYPES[q.type] || TYPES.single}</span><p class="qq">${esc(q.q)}</p>${body}<div id="fb"></div></div>`;
+  clearInterval(g.tm); g.tm = setInterval(() => { const l = g.lim - (Date.now() - g.t0) / 1000; const b = $("#tb"); if (b) b.style.width = Math.max(0, l / g.lim * 100) + "%"; if (l <= 0 && !g.locked) lock(true); }, 100);
+  if ($("#fib")) $("#fib").focus();
+}
+function lock(timeout) {
+  clearInterval(g.tm); g.locked = true; const q = g.q.questions[g.i], left = Math.max(0, g.lim - (Date.now() - g.t0) / 1000); let ok = false, extra = "";
+  if (!timeout) { if (q.type === "fill") { const acc = [].concat(q.answer); ok = acc.some(a => norm(a) === norm($("#fib").value)); if (!ok) extra = "Answer: " + acc.join(" / ") + ". "; } else { const ci = cidx(q); ok = g.sel.length === ci.length && ci.every(x => g.sel.includes(x)); } }
+  else if (q.type === "fill") extra = "Answer: " + [].concat(q.answer).join(" / ") + ". ";
+  let pts = 0; if (ok) { g.streak++; g.correct++; pts = Math.round(500 + 500 * left / g.lim) + Math.min(g.streak - 1, 4) * 50; g.score += pts; } else g.streak = 0;
+  if (q.type === "fill") { $("#fib").disabled = true; } else { const ci = cidx(q); document.querySelectorAll(".tile").forEach((t, k) => { t.disabled = true; t.classList.remove("sel"); if (ci.includes(k)) t.classList.add("ok"); else if (g.sel.includes(k)) t.classList.add("bad"); else t.classList.add("dim"); }); }
+  if ($("#lock")) $("#lock").remove();
+  $("#fb").innerHTML = `<div class="fb"><b>${timeout ? "Time’s up." : ok ? `Correct! +${pts}` : "Not quite."}</b> ${esc(extra)}${esc(q.why || "")}</div><button class="btn" id="nx">${g.i + 1 >= g.q.questions.length ? "See results" : "Next question"}</button>`;
+  $("#nx").focus(); $("#nx").onclick = () => { g.i++; qView(); };
+}
+$("#v").addEventListener("click", e => {
+  if (!g || g.locked) return; const t = e.target.closest(".tile"), q = g.q.questions[g.i];
+  if (t) { const k = +t.dataset.k; if (q.type === "multiple") { g.sel = g.sel.includes(k) ? g.sel.filter(x => x !== k) : [...g.sel, k]; document.querySelectorAll(".tile").forEach((b, i) => b.classList.toggle("sel", g.sel.includes(i))); $("#lock").disabled = !g.sel.length; } else { g.sel = [k]; lock(); } }
+  if (e.target.id === "lock") lock();
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && g && !g.locked && e.target.id === "fib" && e.target.value.trim()) lock(); });
+async function endV() {
+  clearInterval(g.tm); const n = g.q.questions.length; let note = "";
+  const m = me(), id = g.q.id;
+  if (canWrite && m && m.nick && !id.startsWith("local-")) {
+    const prev = (m.bests || {})[id];
+    if (prev && prev.pts >= g.score) note = `Your best here is still ${prev.pts}.`;
+    else { try { await db.doc("players/" + uid).set({ nick: m.nick, bests: { ...(m.bests || {}), [id]: { pts: g.score, ok: g.correct, n, at: Date.now() } } }); note = "New personal best saved to the leaderboard."; } catch (e) { note = "Couldn’t post your score: " + errMsg(e); } }
+  } else note = "Score not posted (solo mode, local quiz, or no username).";
+  $("#v").innerHTML = `<div class="panel tilt" style="text-align:center"><p class="muted">${esc(g.q.title)}</p><div class="big">${g.score}</div><h2>${g.correct} of ${n} correct</h2><p class="muted">${esc(note)}</p>
+    <button class="btn" id="again">Play again</button> <button class="btn alt" id="lb">See leaderboard</button></div>`;
+  $("#again").onclick = () => startGame(id); $("#lb").onclick = () => { boardQ = id; g = null; view = "board"; render(); };
+}
+
+/* ---------- Leaderboard ---------- */
+function boardV() {
+  const Q = allQ().filter(q => !q.id.startsWith("local-"));
+  let rows = boardQ === "all" ? players.filter(p => p.nick).map(p => ({ p, pts: Object.values(p.bests || {}).reduce((a, b) => a + (b.pts || 0), 0), n: Object.keys(p.bests || {}).length })) : bestsOf(boardQ);
+  rows = rows.filter(r => r.pts > 0).sort((a, b) => b.pts - a.pts);
+  const top = rows.slice(0, 3), ord = [1, 0, 2], H = [150, 200, 110], C = ["#c9d1e6", "#ffd93d", "#e0955a"];
+  $("#v").innerHTML = `<div class="panel"><h2>Leaderboard</h2><label>Showing<select id="bq"><option value="all">All quizzes combined</option>${Q.map(q => `<option value="${esc(q.id)}">${esc(q.title)}</option>`).join("")}</select></label>` +
+    (rows.length ? `<div class="podium">${ord.filter(i => top[i]).map(i => { const r = top[i]; return `<div class="pod">${av(r.p.nick)}<span>${esc(r.p.nick)}</span><span class="muted">${r.pts} pts</span><div class="blk" style="height:${H[i]}px;background:${C[i]}">${i + 1}</div></div>`; }).join("")}</div>` +
+      rows.slice(3, 25).map((r, i) => `<div class="row ${r.p.id === uid ? "me" : ""}">${i + 4}. ${av(r.p.nick)}${esc(r.p.nick)}<span class="pts">${r.pts}</span></div>`).join("") : `<p class="muted">No scores yet. Play a quiz to claim first place.</p>`) + `</div>`;
+  $("#bq").value = Q.some(q => q.id === boardQ) ? boardQ : "all"; $("#bq").onchange = e => { boardQ = e.target.value; render(); };
+}
+</script>
+</body>
+</html>
